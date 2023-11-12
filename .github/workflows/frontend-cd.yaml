@@ -29,7 +29,8 @@ jobs:
         cache-dependency-path: "starter/frontend/package-lock.json"
         
     - name: Lint
-      run: | 
+      run: |
+        run ci
         npm run lint
 
   test:
