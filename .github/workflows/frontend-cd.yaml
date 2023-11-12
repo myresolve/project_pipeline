@@ -1,45 +1,34 @@
 name: continuous-deployment-frontend
-
 on:
+  workflow_dispatch:
   push:
-    paths:
-      - 'starter/frontend/**'
     branches:
       - main
-  workflow_dispatch:
+    paths:
+      - 'starter/frontend/**'
 
-env: 
-  WORKING_DIRECTORY: 'starter/frontend'
+env:
+  NODE_VERSION: '18.x'
+  REACT_APP_MOVIE_API_URL: 'backend.default.svc.cluster.local'
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: 18
-
-    - name: Cache Node Modules
-      uses: actions/cache@v2
-      with:
-        path: ~/.npm
-        key: ${{ runner.os }}-node-${{ hashFiles('$FRONTEND_PATH/package-lock.json') }}
-
-    - name: Install dependencies
-      working-directory: ${{ env.WORKING_DIRECTORY }}
-      run: npm install
-
-    - name: Run lint
-      working-directory: ${{ env.WORKING_DIRECTORY }}
-      run: npm run lint
-
-    - name: Run test
-      working-directory: ${{ env.WORKING_DIRECTORY }}
-      run: npm run test
+    lint:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v3
+                
+            - name: Setup NodeJS ${{env.NODE_VERSION}}
+              uses: actions/setup-node@v3
+              with:
+                node-version: ${{env.NODE_VERSION}}
+                cache: 'npm'
+                cache-dependency-path: '${{ env.SRC_DIR}}/package-lock.json'
+            # TODO: Perform a cache action to restore cache before deps install.
+            - name: Install dependencies
+              run: cd ${{env.SRC_DIR}} && npm ci
+            - name: Run linting
+              run: cd ${{env.SRC_DIR}} && npm run lint
 
   test:
     runs-on: ubuntu-latest
