@@ -1,4 +1,4 @@
-name: continuous-intergration-backend
+name: continuous-integration-backend
 
 on:
   pull_request:
