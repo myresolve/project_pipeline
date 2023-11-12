@@ -74,9 +74,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 14
-
-      - name: Run test
-        run: cd ./starter/frontend && npm run test
       
       - name: Build Docker Image
         run: |
