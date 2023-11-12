@@ -8,45 +8,34 @@ on:
       - "frontend/**"
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./frontend
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+    lint-job:
+      runs-on: ubuntu-latest
 
-      - name: Use Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16.0.0'
+      steps:
+          # Checkout code
+          - name: Checkout code
+            uses: actions/checkout@v3
 
-      - name: Cache node modules
-        id: cache-npm
-        uses: actions/cache@v3
-        env:
-          cache-name: cache-node-modules
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
+          # Set up Node.js
+          - name: Set up Node.js
+            uses: actions/setup-node@v3
+            with:
+              node-version: ${{env.NODE_VERSION}}
 
-      - if: ${{ steps.cache-yarn.outputs.cache-hit != 'true' }}
-        name: List the state of node modules
-        continue-on-error: true
-        run: npm list
+          # Restore cache
+          - name: Restore cache
+            uses: actions/cache@v3
+            with:
+              key: npm-cache-${{ hashFiles('**/package-lock.json') }}
+              path: ~/.npm
 
-      - name: Install dependencies
-        run: |
-          npm install
+          # Install the dependencies
+          - name: Install the dependencies
+            run: cd starter/frontend && npm ci
 
-      - name: Run lint
-        run: |
-          npm run lint
+          # Run the linter
+          - name: Run the linter
+            run: cd starter/frontend && npm run lint
 
   test:
     runs-on: ubuntu-latest
