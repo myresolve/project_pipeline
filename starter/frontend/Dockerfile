@@ -1,4 +1,4 @@
-FROM  public.ecr.aws/docker/library/node:18.14.2-alpine3.17
+FROM  public.ecr.aws/docker/library/node:16.0.0
 
 ARG REACT_APP_MOVIE_API_URL
 ENV REACT_APP_MOVIE_API_URL=${REACT_APP_MOVIE_API_URL}
@@ -9,7 +9,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install packages
-RUN npm ci
+RUN npm i -g eslint
 
 # Copy code
 COPY . .
