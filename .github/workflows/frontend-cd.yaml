@@ -30,7 +30,8 @@ jobs:
         
     - name: Lint
       run: |
-        npm ci
+        npm config set legacy-peer-deps true
+        npm i -g eslint
         npm prune --no-production
         npm run lint
 
