@@ -31,7 +31,7 @@ jobs:
     - name: Lint
       run: | 
         npm config set legacy-peer-deps true
-        npm install
+        npm i -g eslint
         npm run lint
 
   test:
@@ -54,7 +54,7 @@ jobs:
     - name: Test
       run: | 
         npm config set legacy-peer-deps true
-        npm install
+        npm i -g eslint
         npm run test 
 
   deploy:
