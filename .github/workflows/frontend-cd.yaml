@@ -31,6 +31,8 @@ jobs:
     - name: Lint
       run: |
         npm install --save-dev eslint
+        npm i -g eslint
+        npm ci
         npm run lint
 
   test:
