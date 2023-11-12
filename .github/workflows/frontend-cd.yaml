@@ -30,7 +30,7 @@ jobs:
         
     - name: Lint
       run: |
-        npm init @eslint/config
+        npm ci
         npm prune --no-production
         npm run lint
 
