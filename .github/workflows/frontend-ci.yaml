@@ -65,11 +65,35 @@ jobs:
         working-directory: starter/frontend
     needs:
       - lint
-      - test
+      - test 
     steps:
-      - name: Check out repository
+      - name: checkout code
         uses: actions/checkout@v3
 
-      - name: Build docker image
+      - name: Setup nodejs
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14
+      
+      - name: Cache dependencies
+        id: cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install prettier
         run: |
-          docker build --build-arg=REACT_APP_MOVIE_API_URL=${{ env.REACT_APP_MOVIE_API_URL }} -t frontend:${GITHUB_SHA} .
+          cd ./starter/frontend 
+          npm install prettier@2.8.8 --save-dev
+
+      - name: Install dependencies
+        run: cd ./starter/frontend && npm install
+
+      - name: Run test
+        run: cd ./starter/frontend && npm run test
+      
+      - name: Build Docker Image
+        run: |
+          cd ./starter/frontend
+          docker build -t frontend .
