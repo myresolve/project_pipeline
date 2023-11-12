@@ -31,6 +31,7 @@ jobs:
 
       - name: Lint
         run: |
+          npm config set legacy-peer-deps true
           npm ci
           npm run lint
 
@@ -53,6 +54,7 @@ jobs:
 
       - name: Test
         run: |
+          npm config set legacy-peer-deps true
           npm ci
           npm run test 
 
