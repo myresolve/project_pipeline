@@ -30,9 +30,9 @@ jobs:
         
     - name: Lint
       run: |
-        npm install
+        npm init --yes && npm init @eslint/config
         npm ci
-
+        npm run lint 
   test:
     runs-on: ubuntu-latest
     defaults:
