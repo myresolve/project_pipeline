@@ -1,43 +1,45 @@
 name: continuous-deployment-frontend
 
 on:
-  workflow_dispatch:
   push:
+    paths:
+      - 'starter/frontend/**'
     branches:
       - main
+  workflow_dispatch:
+
+env: 
+  WORKING_DIRECTORY: 'starter/frontend'
 
 jobs:
-
-  lint:
+  test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Set up Node.js 
-        uses: actions/setup-node@v3
-        with:
-          node-version: latest
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: 18
 
-      - name: Cache npm
-        id: cache-npm
-        uses: actions/cache@v3
-        env:
-          cache-name: cache-npm
-        with:
-          # npm cache files are stored in `~/.npm` on Linux/macOS
-          path: ~/.npm
-          key: ${{ runner.os }}-npm-${{ env.cache-name }}-${{ hashFiles('**/starter/frontend/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-npm-${{ env.cache-name }}-
+    - name: Cache Node Modules
+      uses: actions/cache@v2
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('$FRONTEND_PATH/package-lock.json') }}
 
-      - name: Install dependencies
-        run: |
-          cd starter/frontend && npm ci
+    - name: Install dependencies
+      working-directory: ${{ env.WORKING_DIRECTORY }}
+      run: npm install
 
-      - name: Lint
-        run: |
-          cd starter/frontend && npm run lint
+    - name: Run lint
+      working-directory: ${{ env.WORKING_DIRECTORY }}
+      run: npm run lint
+
+    - name: Run test
+      working-directory: ${{ env.WORKING_DIRECTORY }}
+      run: npm run test
 
   test:
     runs-on: ubuntu-latest
