@@ -31,7 +31,7 @@ jobs:
     - name: Lint
       run: |
         rm -rf node_modules/ && npm install && npm rebuild
-        npm i -g eslint
+        npm ci
         npm run lint
 
   test:
