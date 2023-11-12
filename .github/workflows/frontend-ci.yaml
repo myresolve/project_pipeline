@@ -77,5 +77,4 @@ jobs:
       
       - name: Build Docker Image
         run: |
-          cd ./starter/frontend
           docker build -t frontend .
