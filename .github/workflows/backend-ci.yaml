@@ -1,76 +1,120 @@
-name: continuous-integration-backend
+name: Backend Continuous Integration
+
 on:
-  workflow_dispatch:
   pull_request:
     branches:
       - main
     paths:
       - 'starter/backend/**'
-
-env:
-  PYTHON_VERSION: '3.10'
+  
+  workflow_dispatch:
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: starter/backend
+
+  lint-backend:
+    name: 'Lint backend'
+    runs-on: ubuntu-latest   # Use the latest Ubuntu runner
 
     steps:
-      - name: Check out repository
+      # Check out the code to the runner
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Use Python
+      # Setup Python 3.10.6
+      - name: Use Python 3.10.6
         uses: actions/setup-python@v4
         with:
-          python-version: ${{env.PYTHON_VERSION}}
+          python-version: '3.10.6'
+          cache: 'pipenv'
 
-      - name: Install Pipenv
-        run: pip install pipenv
+      # Install pipenv
+      - name: Install pipenv
+        run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
 
-      - name: Install project dependencies
+      # Install dependencies
+      - name: Install dependencies
         run: pipenv install --dev
+        working-directory: starter/backend
 
-      - name: Lint code
+      # Run lint
+      - name: Run lint
         run: pipenv run lint
-
-  test:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
         working-directory: starter/backend
 
+  test-backend:
+    name: 'Test backend'
+    runs-on: ubuntu-latest   # Use the latest Ubuntu runner
+
     steps:
-      - name: Check out repository
+      # Check out the code to the runner
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Use Python
+      # Setup Python 3.10.6
+      - name: Use Python 3.10.6
         uses: actions/setup-python@v4
         with:
-          python-version: ${{env.PYTHON_VERSION}}
+          python-version: '3.10.6'
+          cache: 'pipenv'
 
-      - name: Install Pipenv
-        run: pip install pipenv
+      # Install pipenv
+      - name: Install pipenv
+        run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
 
-      - name: Install project dependencies
+      # Install dependencies
+      - name: Install dependencies
         run: pipenv install --dev
-
-      - name: Run tests
-        run: pipenv run test
-
-  build:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
         working-directory: starter/backend
-    needs:
-      - lint
-      - test
+
+      # Run test
+      - name: Run test
+        run: pipenv run test
+        working-directory: starter/backend
+
+  build-backend:
+    name: 'Build backend'
+    needs: [ lint-backend, test-backend ]
+    runs-on: ubuntu-latest
+
     steps:
-      - name: Check out repository
+      # Check out the code to the runner
+      - name: Checkout code
         uses: actions/checkout@v3
 
+      # Setup Python 3.10.6
+      - name: Use Python 3.10.6
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10.6'
+          cache: 'pipenv'
+
+      # Install pipenv
+      - name: Install pipenv
+        run: curl https://raw.githubusercontent.com/pypa/pipenv/master/get-pipenv.py | python
+
+      # Install dependencies
+      - name: Install dependencies
+        run: pipenv install
+        working-directory: starter/backend
+
+      # Setup Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # Build docker image
       - name: Build docker image
         run: |
-          docker build -t backend .
+          cd starter/backend
+          docker build --no-cache --tag mp-backend:latest .
+
+      # Run docker image
+      - name: Run docker image
+        run: docker run -p 5000:5000 --name mp-backend -d mp-backend
+
+      # Check the running application
+      - name: Check the running application
+        run: curl http://localhost:5000/movies
+
+      # Review logs
+      - name: Review logs
+        run: docker logs mp-backend
