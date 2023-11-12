@@ -8,7 +8,7 @@ on:
       - 'starter/frontend/**'
     
 env:
-  NODE_VERSION: '14.x'
+  NODE_VERSION: '18.x'
 
 jobs:
   lint:
@@ -30,7 +30,7 @@ jobs:
         
     - name: Lint
       run: |
-        rpm ci
+        npm prune --no-production
         npm run lint
 
   test:
