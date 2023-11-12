@@ -30,7 +30,6 @@ jobs:
         
     - name: Lint
       run: |
-        rm -rf node_modules/ && npm install && npm rebuild
         npm install --save-dev eslint
         npm run lint
 
