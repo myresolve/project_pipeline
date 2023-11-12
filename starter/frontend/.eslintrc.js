@@ -1,7 +1,7 @@
 module.exports = {
   ignorePatterns: ['build/', 'dist/', 'node_modules/'],
   extends: ['eslint:recommended', 'plugin:react/recommended'],
-  plugins: ['react', 'prettier'],
+  plugins: ['react'],
   settings: {
     react: {
       version: 'detect',
