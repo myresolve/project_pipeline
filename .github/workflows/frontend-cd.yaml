@@ -30,7 +30,6 @@ jobs:
         
     - name: Lint
       run: | 
-        npm ci
         npm run lint
 
   test:
@@ -52,7 +51,6 @@ jobs:
         
     - name: Test
       run: | 
-        npm ci
         npm run test 
 
   deploy:
