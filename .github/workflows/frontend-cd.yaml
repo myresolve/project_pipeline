@@ -30,7 +30,6 @@ jobs:
         
     - name: Lint
       run: | 
-        npm i -g eslint
         npm ci
         npm run lint
 
