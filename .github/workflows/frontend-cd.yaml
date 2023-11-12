@@ -30,7 +30,6 @@ jobs:
         
     - name: Lint
       run: | 
-        npm config set legacy-peer-deps true
         npm i -g eslint
         npm ci
         npm run lint
