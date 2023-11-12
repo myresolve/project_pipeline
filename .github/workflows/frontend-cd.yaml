@@ -1,41 +1,37 @@
-name: Frontend Continuous Deployment
+name: continuous-deployment-frontend
 on:
   workflow_dispatch:
   push:
     branches:
-      - main
+        - main
     paths:
-      - "frontend/**"
+      - 'starter/frontend/**'
+    
+env:
+  NODE_VERSION: '18.x'
 
 jobs:
-    lint-job:
-      runs-on: ubuntu-latest
+  lint:
+    runs-on: ubuntu-latest
+    defaults:
+        run:
+          working-directory: starter/frontend
 
-      steps:
-          # Checkout code
-          - name: Checkout code
-            uses: actions/checkout@v3
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v3
 
-          # Set up Node.js
-          - name: Set up Node.js
-            uses: actions/setup-node@v3
-            with:
-              node-version: ${{env.NODE_VERSION}}
-
-          # Restore cache
-          - name: Restore cache
-            uses: actions/cache@v3
-            with:
-              key: npm-cache-${{ hashFiles('**/package-lock.json') }}
-              path: ~/.npm
-
-          # Install the dependencies
-          - name: Install the dependencies
-            run: cd starter/frontend && npm ci
-
-          # Run the linter
-          - name: Run the linter
-            run: cd starter/frontend && npm run lint
+    - name: Use Node.js 
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{env.NODE_VERSION}}
+        cache: 'npm'
+        cache-dependency-path: "starter/frontend/package-lock.json"
+        
+    - name: Lint
+      run: | 
+        npm ci
+        npm run lint
 
   test:
     runs-on: ubuntu-latest
