@@ -30,7 +30,6 @@ jobs:
         
     - name: Lint
       run: |
-        npm config set legacy-peer-deps true
         rm -rf node_modules/ && npm install && npm rebuild
         npm run lint
 
