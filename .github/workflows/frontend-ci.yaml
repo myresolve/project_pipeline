@@ -82,11 +82,6 @@ jobs:
           path: ~/.npm
           key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
 
-      - name: Install prettier
-        run: |
-          cd ./starter/frontend 
-          npm install prettier@2.8.8 --save-dev
-
       - name: Install dependencies
         run: cd ./starter/frontend && npm install
 
