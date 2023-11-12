@@ -1,115 +1,95 @@
-name: Frontend Continuos Deployment
-
+name: continuous-deployment-frontend
 on:
   workflow_dispatch:
   push:
     branches:
-      - main
+        - main
     paths:
       - 'starter/frontend/**'
-  workflow_dispatch:
+    
+env:
+  NODE_VERSION: '16.x'
 
 jobs:
-
   lint:
-    name: Lint
     runs-on: ubuntu-latest
+    defaults:
+        run:
+          working-directory: starter/frontend
 
     steps:
-    - name: Checkout code
+    - name: Check out repository
       uses: actions/checkout@v3
 
-    - name: Setup Node.js
+    - name: Use Node.js 
       uses: actions/setup-node@v3
       with:
-        node-version: latest
-
-    - name: Install Dependencies
-      run: |
-        cd starter/frontend
-        npm ci
-
+        node-version: ${{env.NODE_VERSION}}
+        cache: 'npm'
+        cache-dependency-path: "starter/frontend/package-lock.json"
+        
     - name: Lint
-      run: |
-        cd starter/frontend
+      run: | 
+        npm ci
         npm run lint
 
   test:
-    name: Test
     runs-on: ubuntu-latest
+    defaults:
+        run:
+          working-directory: starter/frontend
 
     steps:
-    - name: Checkout code
+    - name: Check out repository
       uses: actions/checkout@v3
 
-    - name: Setup Node.js
+    - name: Use Node.js 
       uses: actions/setup-node@v3
       with:
-        node-version: latest
-
-    - name: Install Dependencies
-      run: |
-        cd starter/frontend
+        node-version: ${{env.NODE_VERSION}}
+        cache: 'npm'
+        cache-dependency-path: "starter/frontend/package-lock.json"
+        
+    - name: Test
+      run: | 
+        npm config set legacy-peer-deps true
+        npm i -g eslint
         npm ci
+        npm run test 
 
-    - name: Run Tests
-      run: |
-        cd starter/frontend
-        npm test
-
-  build:
-    name: Build
+  deploy:
     runs-on: ubuntu-latest
-    needs: [lint, test]
-
+    needs:
+      - lint
+      - test 
     steps:
-    - name: Checkout code
+    - name: Check out repository
       uses: actions/checkout@v3
 
-    - name: Configure AWS CLI
+    - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        
         aws-region: us-east-1
 
     - name: Login to Amazon ECR
-      uses: aws-actions/amazon-ecr-login@v1
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
 
-    - name: Build Docker Image
+    - name:  Build, tag, and push image to Amazon ECR
+      working-directory: starter/frontend
       run: |
-        cd starter/frontend
-        docker build --build-arg REACT_APP_MOVIE_API_URL=http://localhost:5000 --tag 130963274747.dkr.ecr.us-east-1.amazonaws.com/frontend:${{ github.sha }} .
-        docker push 130963274747.dkr.ecr.us-east-1.amazonaws.com/frontend:${{ github.sha }}
+        docker build --build-arg REACT_APP_MOVIE_API_URL=${{ secrets.REACT_APP_MOVIE_API_URL }} -t frontend .
+        docker tag frontend:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
+        docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
+    
+    - name: Configure kubectl
+      run: |
+        aws eks update-kubeconfig --name cluster --region us-east-1
 
-  deploy:
-    name: Deploy
-    runs-on: ubuntu-latest
-    needs: [build]
-  
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-  
-    - name: Configure AWS CLI
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
-  
-    - name: Set up Kustomize
-      run: |
-        curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | bash
-        sudo mv kustomize /usr/local/bin/
-  
-    - name: Update kubeconfig
-      run: |
-        aws eks update-kubeconfig --region us-east-1 --name cluster
-  
-    - name: Deploy to Kubernetes
+    - name: Set image tag and apply to cluster
       run: |
         cd starter/frontend/k8s
-        kustomize edit set image frontend=130963274747.dkr.ecr.us-east-1.amazonaws.com/frontend:${{ github.sha }}
+        kustomize edit set image frontend=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
         kustomize build | kubectl apply -f -
