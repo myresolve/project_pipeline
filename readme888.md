@@ -3,12 +3,77 @@ nvm use 16
 npm ci
 npm i -g eslint
 
-gh auth login
-git config --global user.email 148026488+myresolve@users.noreply.github.com
-
 aws configure
-ASIAWA77WBAV5SAMNJEA
-+76XoTaH/5u3AbwBnbp/YOospJD22geAEbAAZxjq
-aws configure set aws_session_token "FwoGZXIvYXdzEOz//////////wEaDKdHfR2h677yLvAiWCLVASieDfO2a8CXmB6HubZjGnIPZfIcT36/wxgudYGWpWJcbeabcyhsy+CuiIeVhYdmHvtNhen70hQH+JwNPt9FIZ6PpsDErQPyI4mQnd4D4eVMEuKbriHUkDjm/H+OtMF38TdG9icuG7S2AB7UQw+8jAoJH2urQOjWZzW8zBt32Yvp2hjW5dQZ2mn09OW1J3sfgmOvtoPKmHkBHKfGLOvnsw1EkE3+ipU8/9XZznDToKnwy7anajIgeQHW48gyODNrMe3wmXz395Y56nJvwbIITz7e3xE5pijj8MCqBjItsUAGGDYE+c7ujs7l1+KvE/fSUbA+sWUw3kUrBp9zoCXQW9J0hJd8p0nKaYe/"
 
 aws eks update-kubeconfig --name cluster --region us-east-1
+
+login
+gh auth login
+
+
+#ubuntu version
+lsb_release -a
+
+chmod +x ./init.sh
+
+export AGENT_ALLOW_RUNASROOT="1"
+
+    #Clone Repo into workspace
+
+Open terminal and enter the folder of the github repository/project you want to update
+Type into terminal: “git add .” and then hit enter
+Type into terminal “git status” and then hit enter (this step is optional)
+Type into terminal “git commit -m ‘type any message here” and then hit enter
+Type into terminal “git push” and then hit enter
+
+gh repo clone myresolve/first_workflow
+    #turn directory into repo
+? git init
+? Reinitialized existing Git repository in /workspace/first_workflow/.git/
+mkdir .github
+cd .github
+.github root$ mkdir workflows
+.github root$ cd workflows
+touch my-first-workflow.yml
+rm my-first-workflow.yml
+touch my-first-workflow.yml
+
+    #add all files of the current directory to track (including untracked) and then use
+git add .
+    #start action
+git commit -m "Added First Workflow" && git push
+git commit -m "parralel-job-example" && git push
+
+git reset --soft HEAD~8 (remove 8 commits)
+git reflog (after mistake)
+
+test
+
+sudo apt-get update; sudo apt-get install -y curl
+nvm install v16.0.0
+nvm use v16.0.0
+npm ci
+? npm install -g npm@7.21.1
+? npx update-browserslist-db@latest
+? npm audit fix --force
+
+
+lint
+
+prettier issue
+#answer
+A workaround is to remove the prettier entry in package.json of this package - no local/global prettier install necessary. Example:
+
+{
+  "devDependencies": {
+    ...
+    "prettier": "^1.19.1", // remove this line completely
+  },
+}
+
+npm i -g eslint
+eslint --fix .
+npm run lint -- --fix
+
+
+? npm install --save-dev prettier
